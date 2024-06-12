@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-
-// 콘트롤러에서 로직을 다루지 않고 서비스에서 로직을 다루는 이유 ?
-// controller는 정확한 함수로 정의하는걸 말함
+import { Repository } from 'typeorm';
+import { PostsModel } from './entities/posts.entity';
+import { InjectRepository } from '@nestjs/typeorm';
 
 interface Post {
   author: string;
@@ -49,37 +49,58 @@ let posts: PostModel[] = [
 
 @Injectable()
 export class PostsService {
-  getAllPost() {
-    return posts;
+  // model에 해당되는 레포지터리를 주입할 때 해 주는 코드
+  constructor(
+    @InjectRepository(PostsModel)
+    private readonly postsRepository: Repository<PostsModel>,
+  ) {}
+  async getAllPost() {
+    return this.postsRepository.find();
   }
 
-  getPostById(id: number) {
-    const post = posts.find((post) => post.id === +id);
+  async getPostById(id: number) {
+    const post = await this.postsRepository.findOne({
+      where: {
+        id,
+      },
+    });
 
     if (!post) {
-      // NotFoundException이란 ? 찾지 못했다라는 의미
       throw new NotFoundException();
     }
+
     return post;
   }
 
-  createPost(author: string, title: string, content: string) {
-    const post: PostModel = {
-      id: posts[posts.length - 1].id + 1,
+  async createPost(author: string, title: string, content: string) {
+    const post = this.postsRepository.create({
       author,
       title,
       content,
       likeCount: 0,
       commentCount: 0,
-    };
+    });
 
-    posts = [...posts, post];
+    const newPost = await this.postsRepository.save(post);
 
-    return post;
+    return newPost;
   }
 
-  updatePost(postId: number, author: string, title: string, content: string) {
-    const post = posts.find((post) => post.id === postId);
+  async updatePost(
+    postId: number,
+    author: string,
+    title: string,
+    content: string,
+  ) {
+    // save의 기능
+    // 1. 만약에 데이터가 존재하지 않는다면 (id 기준) 새로 생성한다.
+    // 2. 만약에 데이터가 존재한다면 (같은 id의 값이 존재한다면) 존재하던 값을 업데이트
+
+    const post = await this.postsRepository.findOne({
+      where: {
+        id: postId,
+      },
+    });
 
     if (!post) {
       throw new NotFoundException();
@@ -97,20 +118,23 @@ export class PostsService {
       post.content = content;
     }
 
-    posts = posts.map((prevPost) => (prevPost.id === postId ? post : prevPost));
+    const newPost = await this.postsRepository.save(post);
 
-    return post;
+    return newPost;
   }
 
-  deletePost(postId: number) {
-    const post = posts.find((post) => post.id === postId);
+  async deletePost(postId: number) {
+    const post = await this.postsRepository.findOne({
+      where: {
+        id: postId,
+      },
+    });
 
     if (!post) {
-      // NotFoundException이란 ? 찾지 못했다라는 의미
       throw new NotFoundException();
     }
 
-    posts = posts.filter((post) => post.id !== postId);
+    await this.postsRepository.delete(postId);
 
     return postId;
   }
