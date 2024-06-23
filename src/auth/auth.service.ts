@@ -1,12 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersModel } from 'src/users/entities/users.entity';
-import { JWT_SECRET } from './const/auth.const';
+import { HASH_ROUNDS, JWT_SECRET } from './const/auth.const';
+import { UsersService } from 'src/users/users.service';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
-  // JWTService를 가져온다.
-  constructor(private readonly jwtService: JwtService) {}
+  // JWTService를 가져온다. - auth.module 내 imports로 Jwtmodule을 안가져오면 오류 나옴
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly usersService: UsersService,
+  ) {}
   /*
     우리가 만드려는 기능
     1. registerWithEmail 함수
@@ -57,5 +62,57 @@ export class AuthService {
       // 만료 기간 - 초단위
       expiresIn: isRefreshToken ? 3600 : 300,
     });
+  }
+
+  loginUser(user: Pick<UsersModel, 'email' | 'id'>) {
+    return {
+      accessToken: this.signToken(user, false),
+      refreshToken: this.signToken(user, true),
+    };
+  }
+
+  //   아래 param에 password는 해시된 password값임
+  async authentocateWithEmailAndPassword(
+    user: Pick<UsersModel, 'email' | 'password'>,
+  ) {
+    // 사용자가 존재하는지 확인 (email)
+    const existingUser = await this.usersService.getUserByEmail(user.email);
+
+    if (!existingUser) {
+      // UnauthorizedException 인증을 통과하지 못했을 때 뱉어주는 에러
+      throw new UnauthorizedException('존재하지 않는 사용자입니다.');
+    }
+
+    // 비밀번호가 맞는지 확인
+    /**
+     * bcrypt.compare에 parameter 들어가는 정보
+     * 1. 입력된 비밀번호
+     * 2. 기존 해시 -> 사용자 정보에 저장돼있는 hash
+     */
+    const passOk = await bcrypt.compare(user.password, existingUser.password);
+
+    if (!passOk) {
+      throw new UnauthorizedException('비밀번호가 틀렸습니다.');
+    }
+
+    return existingUser;
+  }
+
+  async loginWithEmail(user: Pick<UsersModel, 'email' | 'password'>) {
+    const existingUser = await this.authentocateWithEmailAndPassword(user);
+
+    return this.loginUser(existingUser);
+  }
+
+  async registerWithEmail(
+    user: Pick<UsersModel, 'nickname' | 'email' | 'password'>,
+  ) {
+    // 실제 비밀번호(user.password)를 hash 처리 한다
+    // 비밀번호를 몇번 해시 할지 HASH_ROUNDS
+    const hash = await bcrypt.hash(user.password, HASH_ROUNDS);
+
+    const newUser = await this.usersService.createUser(user);
+
+    return this.loginUser(newUser);
   }
 }
