@@ -1,7 +1,12 @@
 import { Injectable } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { UsersModel } from 'src/users/entities/users.entity';
+import { JWT_SECRET } from './const/auth.const';
 
 @Injectable()
 export class AuthService {
+  // JWTService를 가져온다.
+  constructor(private readonly jwtService: JwtService) {}
   /*
     우리가 만드려는 기능
     1. registerWithEmail 함수
@@ -26,4 +31,31 @@ export class AuthService {
         3) 모두 통과되면 찾은 사용자 정보 반환
         4) loginWithEmail에서 반환된 데이터를 기반으로 토큰 생성
     */
+
+  /**
+   * Payload에 들어갈 정보
+   * 1) Email
+   * 2) sub -> id (사용자의 Id)
+   * 3) Type: 'accessToken'  | 'refreshToken'
+   *
+   * 1,2번은 사용자의 정보이다.
+   *  param으로  UsersModel을 불러오는데, 현재 UsersModel 내 모든 프로퍼티를 가져올 필욘 없음
+   * email, id값만 가져오면 돼서 PICK을 사용한다. 타입스크립트 문법
+   *
+   */
+  signToken(user: Pick<UsersModel, 'email' | 'id'>, isRefreshToken: boolean) {
+    const payload = {
+      email: user.email,
+      sub: user.id,
+      type: isRefreshToken ? 'refresh' : 'access',
+    };
+
+    // sign 내 첫번째 param으로는 payload
+    // 두번째 param으로는 옵션이 들어가야 한다.
+    return this.jwtService.sign(payload, {
+      secret: JWT_SECRET,
+      // 만료 기간 - 초단위
+      expiresIn: isRefreshToken ? 3600 : 300,
+    });
+  }
 }
