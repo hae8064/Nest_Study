@@ -48,6 +48,85 @@ export class AuthService {
    * email, id값만 가져오면 돼서 PICK을 사용한다. 타입스크립트 문법
    *
    */
+
+  /**
+   * Header로부터 토큰을 받을 때
+   * {authorization: 'Basic {token}'}
+   * {authorization: 'Bearer {token}'}
+   */
+  extractTokenFromHeader(header: string, isBearer: boolean) {
+    const splitToken = header.split(' ');
+
+    // 서버는 클라이언트에서 잘못된 값이 올 수 있다라는걸 항상 생각해야한다!
+    // 클라이언트 헤더 검증 코드
+    const prefix = isBearer ? 'Bearer' : 'Basic';
+
+    if (splitToken.length !== 2 || splitToken[0] !== prefix) {
+      throw new UnauthorizedException('잘못된 토큰입니다!');
+    }
+
+    const token = splitToken[1];
+
+    return token;
+  }
+
+  /**
+   * dsadas:fdsfsdaa -> email:password로 변환
+   * email:password -> [email, passord]
+   * {email: email, password: password}
+   */
+  decodeBasicToken(base64String: string) {
+    // 디코드 하는 코드
+    const decoded = Buffer.from(base64String, 'base64').toString('utf-8');
+    const split = decoded.split(':');
+    if (split.length !== 2) {
+      throw new UnauthorizedException('잘못된 유형의 토큰입니다.');
+    }
+
+    const email = split[0];
+    const password = split[1];
+
+    return { email, password };
+  }
+
+  /**
+   *
+   * 토큰 검증
+   *
+   */
+  verifyToken(token: string) {
+    return this.jwtService.verify(token, {
+      secret: JWT_SECRET,
+    });
+  }
+
+  //refreshToken으로 refreshToken을 발급받을 수 있게하기 위해 param으로  isRefreshToken
+  rotateToken(token: string, isRefreshToken: boolean) {
+    const decoded = this.jwtService.verify(token, {
+      secret: JWT_SECRET,
+    });
+
+    /**
+     * 토큰에 존재하는 값들
+     * sub: id
+     * email: email
+     * type: 'access' | 'refresh'
+     */
+
+    if (decoded.type !== 'refresh') {
+      throw new UnauthorizedException(
+        '토큰 재발급은 Refresh토큰 으로만 발급 가능합니다.',
+      );
+    }
+
+    return this.signToken(
+      {
+        ...decoded,
+      },
+      isRefreshToken,
+    );
+  }
+
   signToken(user: Pick<UsersModel, 'email' | 'id'>, isRefreshToken: boolean) {
     const payload = {
       email: user.email,
