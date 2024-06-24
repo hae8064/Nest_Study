@@ -111,7 +111,10 @@ export class AuthService {
     // 비밀번호를 몇번 해시 할지 HASH_ROUNDS
     const hash = await bcrypt.hash(user.password, HASH_ROUNDS);
 
-    const newUser = await this.usersService.createUser(user);
+    const newUser = await this.usersService.createUser({
+      ...user,
+      password: hash,
+    });
 
     return this.loginUser(newUser);
   }
