@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Post,
   Put,
 } from '@nestjs/common';
@@ -26,8 +27,8 @@ export class PostsController {
   // param으로 받았기 때문에 string 타입임
   // number 타입이라고 정의 하면 response를 정상적으로 못가져옴
   @Get(':id')
-  getPost(@Param('id') id: string) {
-    return this.postsService.getPostById(+id);
+  getPost(@Param('id', ParseIntPipe) id: number) {
+    return this.postsService.getPostById(id);
   }
 
   // Post / posts - post를 생성한다.
@@ -44,15 +45,15 @@ export class PostsController {
   // PUT /posts/:id
   @Put(':id')
   putPost(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body('title') title?: string,
     @Body('content') content?: string,
   ) {
-    return this.postsService.updatePost(+id, title, content);
+    return this.postsService.updatePost(id, title, content);
   }
 
   @Delete(':id')
-  deletePost(@Param('id') id: string) {
-    return this.postsService.deletePost(+id);
+  deletePost(@Param('id', ParseIntPipe) id: number) {
+    return this.postsService.deletePost(id);
   }
 }
