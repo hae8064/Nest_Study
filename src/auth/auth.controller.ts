@@ -1,12 +1,29 @@
-import { Body, Controller, Headers, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Headers,
+  Post,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { PasswordPipe } from './pipe/password.pipe';
+import {
+  MaxLengthPipe,
+  MinLengthPipe,
+  PasswordPipe,
+} from './pipe/password.pipe';
+import { BasicTokenGuard } from './guard/basic-token.guard';
+import {
+  AccessTokenGuard,
+  RefreshTokenGuard,
+} from './guard/bearer-token.guard';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('token/access')
+  @UseGuards(RefreshTokenGuard)
   postTokenAccess(@Headers('authorization') rawToken: string) {
     const token = this.authService.extractTokenFromHeader(rawToken, true);
 
@@ -21,6 +38,7 @@ export class AuthController {
     };
   }
   @Post('token/refresh')
+  @UseGuards(RefreshTokenGuard)
   postTokenRefresh(@Headers('authorization') rawToken: string) {
     //토큰은 bearer토큰이므로 param 두번째에 true로 변환
     const token = this.authService.extractTokenFromHeader(rawToken, true);
@@ -37,6 +55,7 @@ export class AuthController {
   }
 
   @Post('login/email')
+  @UseGuards(BasicTokenGuard)
   postLoginEmail(@Headers('authorization') rawToken: string) {
     // email:password 값이 -> base64로 인코딩 되어있음
     // ex) dsadasdas:dsafsfas 이러한 형태로 인코딩 되어 있음
@@ -52,7 +71,8 @@ export class AuthController {
   postRegisterEmail(
     @Body('nickname') nickname: string,
     @Body('email') email: string,
-    @Body('password', PasswordPipe) password: string,
+    @Body('password', new MaxLengthPipe(8), new MinLengthPipe(3))
+    password: string,
   ) {
     return this.authService.registerWithEmail({
       nickname,

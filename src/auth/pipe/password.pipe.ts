@@ -17,5 +17,28 @@ export class PasswordPipe implements PipeTransform {
   }
 }
 
-<img src="http://blogfiles.naver.net/MjAxNzExMTNfMjIy/MDAxNTEwNTQ2OTQyNzIx.deANGUaADVP5Iq0KHDLNDoV1apgtasyPiTxU7Pe6FCsg.cPMGsMHId_5OhsnvEY9i2e2bXMC3TKGL3K7x3JoLN94g.PNG.baron19/%EB%B9%88%ED%99%94%EB%A9%B4550.png
-" usemap="#메뉴" /><map name="메뉴"><area shape="rect" coords="6,437,162,460" target="_top" href="https://blog.naver.com/PostList.naver?blogId=lbh8064&amp;from=postList&amp;categoryNo=7" /></map>
+@Injectable()
+export class MaxLengthPipe implements PipeTransform {
+  constructor(private readonly length: number) {}
+
+  transform(value: any, metadata: ArgumentMetadata) {
+    if (value.toString().length > this.length) {
+      throw new BadRequestException(`최대 길이는 ${length}입니다.`);
+    }
+
+    return value.toString();
+  }
+}
+
+@Injectable()
+export class MinLengthPipe implements PipeTransform {
+  constructor(private readonly length: number) {}
+
+  transform(value: any, metadata: ArgumentMetadata) {
+    if (value.toString().length < this.length) {
+      throw new BadRequestException(`최소 길이는 ${length}입니다.`);
+    }
+
+    return value.toString();
+  }
+}
