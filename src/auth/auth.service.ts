@@ -95,9 +95,13 @@ export class AuthService {
    *
    */
   verifyToken(token: string) {
-    return this.jwtService.verify(token, {
-      secret: JWT_SECRET,
-    });
+    try {
+      return this.jwtService.verify(token, {
+        secret: JWT_SECRET,
+      });
+    } catch (e) {
+      throw new UnauthorizedException('토큰이 만료됐거나 잘못된 토큰입니다.');
+    }
   }
 
   //refreshToken으로 refreshToken을 발급받을 수 있게하기 위해 param으로  isRefreshToken
