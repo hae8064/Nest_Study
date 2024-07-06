@@ -9,5 +9,6 @@ import { UsersService } from 'src/users/users.service';
   imports: [JwtModule.register({}), UsersModule],
   controllers: [AuthController],
   providers: [AuthService],
+  exports: [AuthService],
 })
 export class AuthModule {}
