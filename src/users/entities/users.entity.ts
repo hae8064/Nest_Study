@@ -2,6 +2,7 @@ import { Column, Entity, OneToMany } from 'typeorm';
 import { RolesEnum } from '../const/roles.const';
 import { PostsModel } from 'src/posts/entities/posts.entity';
 import { BaseModel } from 'src/common/entity/base.entity';
+import { IsEmail, IsString, length, Length, min } from 'class-validator';
 
 @Entity()
 export class UsersModel extends BaseModel {
@@ -13,15 +14,22 @@ export class UsersModel extends BaseModel {
   })
   //   1) 길이가 20을 넘지 않을 것
   //   2) 유일무이한 값이 될 것
+  @IsString()
+  @Length(1, 20, {
+    message: '닉네임은 1~20자 사이로 입력해주세요.',
+  })
   nickname: string;
 
   @Column({
     unique: true,
   })
+  @IsString()
+  @IsEmail()
   //   1) 유일무이한 값이 돼야 함
   email: string;
 
   @Column()
+  @IsString()
   password: string;
 
   //   role에는 기본 값을 지정해줄거임
