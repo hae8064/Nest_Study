@@ -1,9 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { MoreThan, Repository } from 'typeorm';
 import { PostsModel } from './entities/posts.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { PaginatePostDto } from './dto/paginate-post.dto';
 
 interface Post {
   author: string;
@@ -56,10 +57,53 @@ export class PostsService {
     @InjectRepository(PostsModel)
     private readonly postsRepository: Repository<PostsModel>,
   ) {}
+
   async getAllPost() {
     return this.postsRepository.find({
       relations: ['author'],
     });
+  }
+
+  // paginate Test용
+  async generatePosts(userId: number) {
+    for (let i = 0; i < 100; i++) {
+      await this.createPost(userId, {
+        title: `임의로 생성된 포스트 제목 ${i}`,
+        content: `임의로 생성된 포스트 내용 ${i}`,
+      });
+    }
+  }
+
+  // 1. 오름차순으로 정렬하는 pagiation만 구현한다.
+  async paginatePosts(dto: PaginatePostDto) {
+    // 1,2,3,4,5라는 id값
+    // MoreThan는 typeorm 함수
+    const posts = await this.postsRepository.find({
+      where: {
+        // dto의 프로퍼티 값은 이름 규칙이 있음
+        // where에 사용하고 id라는 속성 __ MoreTHAN을 사용하므로 _more_than
+        id: MoreThan(dto.where__id_more_than ?? 0),
+      },
+      order: {
+        createdAt: dto.order__createdAt,
+      },
+      take: dto.take,
+    });
+
+    /**
+     * Response 구조
+     *
+     * data: Data[],
+     * cursor: {
+     *  after: 마지막 data의 id
+     * },
+     * count: 응답한 데이터의 개수
+     * next: 다음 요청을 할 때 사용할 URL
+     */
+
+    return {
+      data: posts,
+    };
   }
 
   async getPostById(id: number) {
