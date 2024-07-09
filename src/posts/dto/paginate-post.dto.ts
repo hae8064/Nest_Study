@@ -2,6 +2,10 @@ import { IsIn, IsNumber, IsOptional } from 'class-validator';
 
 // 쿼리로 받을 거임
 export class PaginatePostDto {
+  @IsNumber()
+  @IsOptional()
+  page?: number;
+
   // 이전 마지막 데이터의 ID
   // 이 프로퍼티에 입력된 ID보다 높은 ID부터 값을 가져오기
   //   Type을 바꿔줄 때는 Number대문자로 해야한다.
