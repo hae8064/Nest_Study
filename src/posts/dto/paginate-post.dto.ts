@@ -11,12 +11,16 @@ export class PaginatePostDto {
   @IsOptional()
   where__id_more_than?: number;
 
+  @IsNumber()
+  @IsOptional()
+  where__id_less_than?: number;
+
   // 정렬
   // createdAt -> 생성된 시간의 내림차 / 오름차 순으로 정렬 현재는 오름차순 정렬
   // @IsIn 리스트 내 옵션으로ASC 값이 들어와야만 validation pass가 된다
-  @IsIn(['ASC'])
+  @IsIn(['ASC', 'DESC'])
   @IsOptional()
-  order__createdAt: 'ASC' = 'ASC';
+  order__createdAt: 'ASC' | 'DESC' = 'ASC';
 
   //   몇개의 데이터를 응답으로 받을지
   @IsNumber()
