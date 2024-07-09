@@ -110,15 +110,15 @@ export class PostsService {
   async cursorPaginatePosts(dto: PaginatePostDto) {
     const where: FindOptionsWhere<PostsModel> = {};
 
-    if (dto.where__id_less_than) {
+    if (dto.where__id__less_than) {
       /**
        * {
        *   id: LessThan(dto.where__id_less_than)
        * }
        */
-      where.id = LessThan(dto.where__id_less_than);
-    } else if (dto.where__id_more_than) {
-      where.id = MoreThan(dto.where__id_less_than);
+      where.id = LessThan(dto.where__id__less_than);
+    } else if (dto.where__id__more_than) {
+      where.id = MoreThan(dto.where__id__less_than);
     }
     // 1,2,3,4,5라는 id값
     // MoreThan는 typeorm 함수
