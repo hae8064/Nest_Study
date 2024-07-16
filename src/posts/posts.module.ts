@@ -6,6 +6,7 @@ import { PostsModel } from './entities/posts.entity';
 import { AccessTokenGuard } from 'src/auth/guard/bearer-token.guard';
 import { AuthModule } from 'src/auth/auth.module';
 import { UsersModule } from 'src/users/users.module';
+import { CommonModule } from 'src/common/common.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { UsersModule } from 'src/users/users.module';
     AuthModule,
     UsersModule,
     TypeOrmModule.forFeature([PostsModel]),
+    CommonModule,
   ],
   controllers: [PostsController],
   // providers 내부에 리스트로 들어간다.

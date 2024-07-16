@@ -14,6 +14,8 @@ async function bootstrap() {
         // class-validation를 기반으로 변환 해 준다.
         enableImplicitConversion: true,
       },
+      whitelist: true,
+      forbidNonWhitelisted: true,
     }),
   );
   await app.listen(3000);
