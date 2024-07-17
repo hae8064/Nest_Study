@@ -7,10 +7,10 @@ import {
   ParseIntPipe,
   Patch,
   Post,
-  Put,
   Query,
-  Request,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { AccessTokenGuard } from 'src/auth/guard/bearer-token.guard';
@@ -19,6 +19,7 @@ import { User } from 'src/users/decorator/user.decorator';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { PaginatePostDto } from './dto/paginate-post.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('posts')
 export class PostsController {
@@ -47,8 +48,14 @@ export class PostsController {
   // DTO - Data Transfer Object
   @Post()
   @UseGuards(AccessTokenGuard)
-  postPosts(@User('id') userId: number, @Body() body: CreatePostDto) {
-    return this.postsService.createPost(userId, body);
+  // 실제 파일을 업로드할 필드의 이름을 넣어주면 된다
+  @UseInterceptors(FileInterceptor('image'))
+  postPosts(
+    @User('id') userId: number,
+    @Body() body: CreatePostDto,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    return this.postsService.createPost(userId, body, file?.filename);
   }
 
   // TODO: 추후 삭제 예정

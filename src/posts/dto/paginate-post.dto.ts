@@ -1,4 +1,4 @@
-import { IsIn, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 import { BasePaginationDto } from 'src/common/dto/base-pagination.dto';
 
 // 쿼리로 받을 거임

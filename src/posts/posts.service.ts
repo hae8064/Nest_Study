@@ -5,21 +5,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { PaginatePostDto } from './dto/paginate-post.dto';
-import { count } from 'console';
 import { CommonService } from 'src/common/common.service';
 import { ConfigService } from '@nestjs/config';
 import {
   ENV_HOST_KEY,
   ENV_PROTOCOL_KEY,
 } from 'src/common/const/env-keys.const';
-
-interface Post {
-  author: string;
-  title: string;
-  content: string;
-  likeCount: number;
-  commentCount: number;
-}
 
 export interface PostModel {
   id: number;
@@ -29,33 +20,6 @@ export interface PostModel {
   likeCount: number;
   commentCount: number;
 }
-
-let posts: PostModel[] = [
-  {
-    id: 1,
-    author: 'newjeans',
-    title: '뉴진스 민지',
-    content: 'dsadas',
-    likeCount: 321,
-    commentCount: 321312,
-  },
-  {
-    id: 2,
-    author: 'newjeans',
-    title: '뉴진스 혜린',
-    content: '혜린!!',
-    likeCount: 321,
-    commentCount: 321312,
-  },
-  {
-    id: 3,
-    author: 'blackpink',
-    title: '블핑',
-    content: '공연하느 로제',
-    likeCount: 321,
-    commentCount: 321312,
-  },
-];
 
 @Injectable()
 export class PostsService {
@@ -221,12 +185,13 @@ export class PostsService {
     return post;
   }
 
-  async createPost(authorId: number, postDto: CreatePostDto) {
+  async createPost(authorId: number, postDto: CreatePostDto, image?: string) {
     const post = this.postsRepository.create({
       author: {
         id: authorId,
       },
       ...postDto,
+      image,
       likeCount: 0,
       commentCount: 0,
     });

@@ -1,4 +1,4 @@
-import { PipeTransform, BadRequestException } from '@nestjs/common';
+import { PipeTransform, BadRequestException, Injectable } from '@nestjs/common';
 
 // PipeTransform을 implement 해 줘야 함
 export class PasswordPipe implements PipeTransform {
@@ -16,7 +16,7 @@ export class PasswordPipe implements PipeTransform {
 export class MaxLengthPipe implements PipeTransform {
   constructor(private readonly length: number) {}
 
-  transform(value: any, metadata: ArgumentMetadata) {
+  transform(value: any) {
     if (value.toString().length > this.length) {
       throw new BadRequestException(`최대 길이는 ${length}입니다.`);
     }
@@ -29,7 +29,7 @@ export class MaxLengthPipe implements PipeTransform {
 export class MinLengthPipe implements PipeTransform {
   constructor(private readonly length: number) {}
 
-  transform(value: any, metadata: ArgumentMetadata) {
+  transform(value: any) {
     if (value.toString().length < this.length) {
       throw new BadRequestException(`최소 길이는 ${length}입니다.`);
     }

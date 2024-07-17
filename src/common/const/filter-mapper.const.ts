@@ -1,4 +1,3 @@
-import { equal } from 'assert';
 import {
   Any,
   ArrayContainedBy,

@@ -17,10 +17,18 @@ import {
   ENV_DB_PORT,
   ENV_DB_USERNAME,
 } from './common/const/env-keys.const';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { PUBLIC_FOLDER_PATH } from './common/const/path.const';
 
 @Module({
   imports: [
     PostsModule,
+    // rootpath: 파일들을 서빙할 가장 루트 패스
+    ServeStaticModule.forRoot({
+      // public접두사가 이렇게만 넣으면 빠짐 -> 그래서 하단에 serveRoot가 추가해줘야 함
+      rootPath: PUBLIC_FOLDER_PATH,
+      serveRoot: '/public',
+    }),
     ConfigModule.forRoot({
       envFilePath: '.env',
       isGlobal: true,
