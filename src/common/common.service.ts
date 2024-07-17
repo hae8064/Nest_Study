@@ -35,6 +35,7 @@ export class CommonService {
   ) {
     const findOptions = this.composeFindOptions<T>(dto);
 
+    // 데이터베이스에 데이터 검색하고 레코드 수 를 가져온다
     const [data, count] = await repository.findAndCount({
       ...findOptions,
       ...overrideFindOptions,
@@ -208,7 +209,7 @@ export class CommonService {
      */
     if (split.length === 2) {
       // [where, id] 이렇게 구성 됨
-      const [_, field] = split;
+      const [, field] = split;
 
       /**
        * field -> 'id'
@@ -227,7 +228,7 @@ export class CommonService {
        */
 
       // ['where', 'id', 'more_than']
-      const [_, field, operator] = split;
+      const [, field, operator] = split;
 
       // where__id__between = 3, 4
       // 만약에 split 대상 문자가 존재하지 않으면 길이가 무조건 1이다.
