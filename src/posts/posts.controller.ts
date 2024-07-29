@@ -50,12 +50,9 @@ export class PostsController {
   @UseGuards(AccessTokenGuard)
   // 실제 파일을 업로드할 필드의 이름을 넣어주면 된다
   @UseInterceptors(FileInterceptor('image'))
-  postPosts(
-    @User('id') userId: number,
-    @Body() body: CreatePostDto,
-    @UploadedFile() file?: Express.Multer.File,
-  ) {
-    return this.postsService.createPost(userId, body, file?.filename);
+  async postPosts(@User('id') userId: number, @Body() body: CreatePostDto) {
+    await this.postsService.createPostImage(body);
+    return this.postsService.createPost(userId, body);
   }
 
   // TODO: 추후 삭제 예정
