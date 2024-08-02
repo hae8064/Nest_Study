@@ -196,6 +196,7 @@ export class AuthService {
   async registerWithEmail(user: RegisteruserDto) {
     // 실제 비밀번호(user.password)를 hash 처리 한다
     // 비밀번호를 몇번 해시 할지 HASH_ROUNDS
+    console.log('user', user);
     const hash = await bcrypt.hash(
       user.password,
       parseInt(this.configService.get<string>(ENV_HASH_ROUNDS)),

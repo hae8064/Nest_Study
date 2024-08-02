@@ -19,6 +19,7 @@ import {
 } from './common/const/env-keys.const';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { PUBLIC_FOLDER_PATH } from './common/const/path.const';
+import { ImageModel } from './common/entity/image.entity';
 
 @Module({
   imports: [
@@ -41,7 +42,7 @@ import { PUBLIC_FOLDER_PATH } from './common/const/path.const';
       username: process.env[ENV_DB_USERNAME],
       password: process.env[ENV_DB_DB_PASSWORD],
       database: process.env[ENV_DB_DATABASE],
-      entities: [PostsModel, UsersModel],
+      entities: [PostsModel, UsersModel, ImageModel],
       // 개발환경에서는 true로 맞추는게 좋다.
       synchronize: true,
     }),

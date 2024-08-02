@@ -8,7 +8,6 @@ import {
   Patch,
   Post,
   Query,
-  UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -20,13 +19,24 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { PaginatePostDto } from './dto/paginate-post.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ImageModelType } from 'src/common/entity/image.entity';
+import { DataSource, QueryRunner as QR } from 'typeorm';
+import { PostsImagesService } from './image/images.service';
+import { LogInterceptor } from 'src/common/interceptor/log.interceptor';
+import { TransactionInterceptor } from 'src/common/interceptor/transaction.interceptor';
+import { QueryRunner } from 'src/common/decorator/query-runner.decorator';
 
 @Controller('posts')
 export class PostsController {
-  constructor(private readonly postsService: PostsService) {}
+  constructor(
+    private readonly postsService: PostsService,
+    private readonly postsImagesService: PostsImagesService,
+    private readonly dataSource: DataSource,
+  ) {}
 
   // 모든 Post를 가져온다.
   @Get()
+  @UseInterceptors(LogInterceptor)
   getPosts(@Query() query: PaginatePostDto) {
     return this.postsService.paginatePosts(query);
   }
@@ -50,12 +60,28 @@ export class PostsController {
   @UseGuards(AccessTokenGuard)
   // 실제 파일을 업로드할 필드의 이름을 넣어주면 된다
   @UseInterceptors(FileInterceptor('image'))
-  async postPosts(@User('id') userId: number, @Body() body: CreatePostDto) {
-    await this.postsService.createPostImage(body);
-    return this.postsService.createPost(userId, body);
+  @UseInterceptors(TransactionInterceptor)
+  async postPosts(
+    @User('id') userId: number,
+    @Body() body: CreatePostDto,
+    @QueryRunner() qr: QR,
+  ) {
+    const post = await this.postsService.createPost(userId, body, qr);
+
+    // throw new InternalServerErrorException('에러가 생겼습니다.');
+
+    for (let i = 0; i < body.images.length; i++) {
+      await this.postsImagesService.createPostImage({
+        post,
+        order: i,
+        path: body.images[i],
+        type: ImageModelType.POST_IMAGE,
+      });
+    }
+
+    return this.postsService.getPostById(post.id, qr);
   }
 
-  // TODO: 추후 삭제 예정
   @Post('random')
   @UseGuards(AccessTokenGuard)
   async postPostsRandom(@User() user: UsersModel) {
