@@ -9,7 +9,9 @@ import { PickType } from '@nestjs/mapped-types';
 
 // 실제로 검증 받고 싶은 값들을 넣어주면 됨
 export class CreatePostDto extends PickType(PostsModel, ['title', 'content']) {
-  @IsString()
+  @IsString({
+    each: true,
+  })
   @IsOptional()
-  image?: string;
+  images: string[] = [];
 }
