@@ -3,9 +3,9 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PostsModule } from './posts/posts.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { PostsModel } from './posts/entities/posts.entity';
+import { PostsModel } from './posts/entity/posts.entity';
 import { UsersModule } from './users/users.module';
-import { UsersModel } from './users/entities/users.entity';
+import { UsersModel } from './users/entity/users.entity';
 import { AuthModule } from './auth/auth.module';
 import { CommonModule } from './common/common.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
@@ -21,6 +21,9 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { PUBLIC_FOLDER_PATH } from './common/const/path.const';
 import { ImageModel } from './common/entity/image.entity';
 import { ChatsModule } from './chats/chats.module';
+import { ChatsModel } from './chats/entity/chats-entity';
+import { MessagesModel } from './chats/messages/entity/message.entity';
+import { CommentsModule } from './posts/comments/comments.module';
 
 @Module({
   imports: [
@@ -43,7 +46,7 @@ import { ChatsModule } from './chats/chats.module';
       username: process.env[ENV_DB_USERNAME],
       password: process.env[ENV_DB_DB_PASSWORD],
       database: process.env[ENV_DB_DATABASE],
-      entities: [PostsModel, UsersModel, ImageModel],
+      entities: [PostsModel, UsersModel, ImageModel, ChatsModel],
       // 개발환경에서는 true로 맞추는게 좋다.
       synchronize: true,
     }),
@@ -51,6 +54,8 @@ import { ChatsModule } from './chats/chats.module';
     AuthModule,
     CommonModule,
     ChatsModule,
+    MessagesModel,
+    CommentsModule,
   ],
   controllers: [AppController],
   providers: [

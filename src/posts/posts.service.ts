@@ -6,7 +6,7 @@ import {
   QueryRunner,
   Repository,
 } from 'typeorm';
-import { PostsModel } from './entities/posts.entity';
+import { PostsModel } from './entity/posts.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
@@ -184,7 +184,7 @@ export class PostsService {
   async getPostById(id: number, qr?: QueryRunner) {
     const repository = this.getRepository(qr);
 
-    const post = await this.postsRepository.findOne({
+    const post = await repository.findOne({
       ...DEFAULT_POST_FIND_OPTIONS,
       where: {
         id,
@@ -265,5 +265,13 @@ export class PostsService {
     await this.postsRepository.delete(postId);
 
     return postId;
+  }
+
+  async checkPostExistsById(id: number) {
+    return this.postsRepository.exists({
+      where: {
+        id,
+      },
+    });
   }
 }

@@ -7,7 +7,7 @@ import {
 import { PostsService } from './posts.service';
 import { PostsController } from './posts.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { PostsModel } from './entities/posts.entity';
+import { PostsModel } from './entity/posts.entity';
 import { AccessTokenGuard } from 'src/auth/guard/bearer-token.guard';
 import { AuthModule } from 'src/auth/auth.module';
 import { UsersModule } from 'src/users/users.module';
@@ -28,6 +28,7 @@ import { LogMiddleware } from 'src/common/middleware/log.middleware';
   controllers: [PostsController],
   // providers 내부에 리스트로 들어간다.
   providers: [PostsService, AccessTokenGuard, PostsImagesService],
+  exports: [PostsService],
 })
 export class PostsModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
